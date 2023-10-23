@@ -1,0 +1,1 @@
+cmd_/usr/local/home/dzuberi/code/testp/DriverSrcLinux/MSRdrv.ko := ld -r -m elf_x86_64 -z noexecstack --build-id=sha1  -T scripts/module.lds -o /usr/local/home/dzuberi/code/testp/DriverSrcLinux/MSRdrv.ko /usr/local/home/dzuberi/code/testp/DriverSrcLinux/MSRdrv.o /usr/local/home/dzuberi/code/testp/DriverSrcLinux/MSRdrv.mod.o;  true

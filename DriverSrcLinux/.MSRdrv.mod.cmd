@@ -1,0 +1,1 @@
+cmd_/usr/local/home/dzuberi/code/testp/DriverSrcLinux/MSRdrv.mod := printf '%s\n'   MSRdrv.o | awk '!x[$$0]++ { print("/usr/local/home/dzuberi/code/testp/DriverSrcLinux/"$$0) }' > /usr/local/home/dzuberi/code/testp/DriverSrcLinux/MSRdrv.mod
