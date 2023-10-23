@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stdint.h>
 //#include "PMCTest.h"
 
 #ifndef __pmctest
@@ -11,9 +12,9 @@
 extern "C" {
 #endif
     extern int CounterTypesDesired[MAXCOUNTERS];// list of desired counter types
-	int init_performance_counters(int* cntrs, int num);
-	int stop_performance_counters(int* cntrs, int num);
-	int* read_performance_counters(int* cntrs, int num);
+	int init_performance_counters();
+	int stop_performance_counters();
+	void read_performance_counters(uint64_t* cntrs); //pass in an array of size MAXCOUNTERS
 #ifdef __cplusplus
 }
 #endif

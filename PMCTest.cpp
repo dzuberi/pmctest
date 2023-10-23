@@ -200,9 +200,9 @@ ThreadProcedureDeclaration(ThreadProc1) {
     return 0;
 };
 */
-int init_stop_performance_counters(int* cntrs, int num, int command) {
-	assert(num <= MAXCOUNTERS);
-    int i, cnt, thread;
+int init_stop_performance_counters(int command) {
+	//assert(num <= MAXCOUNTERS);
+    int i, thread;
     int countthreads = 0;
     //int command = 1;                 // 1: start counters, 2: stop counters
 
@@ -232,12 +232,12 @@ int init_stop_performance_counters(int* cntrs, int num, int command) {
             ProcNum[thread] = -1;
         }
     }
-	printf("countthreads: %d\n",countthreads);
+	//printf("countthreads: %d\n",countthreads);
     // Lock processor number for each thread
     MSRCounters.LockProcessor();
 
     // Find counter defitions and put them in queue for driver
-    MSRCounters.QueueCounters();
+	if (command == 1) MSRCounters.QueueCounters();
 
     // Install and load driver
     int e = MSRCounters.StartDriver();
@@ -269,10 +269,10 @@ int init_stop_performance_counters(int* cntrs, int num, int command) {
 				//MSRCounters.print_queue1(thread);
                 MSRCounters.StartCounters(thread);
 				//MSRCounters.print_queue1(thread);
-				printf("\n\nCounters:\n");
-				for (int i = 0; i < MAXCOUNTERS; i++) {
-					printf("Counters[i]: %s = %x\n",MSRCounters.CounterNames[i],Counters[i]);
-				}
+				//printf("\n\nCounters:\n");
+				//for (int i = 0; i < MAXCOUNTERS; i++) {
+				//	printf("Counters[i]: %s = %x\n",MSRCounters.CounterNames[i],Counters[i]);
+				//}
             }
             else  {
 				//MSRCounters.print_queue2(thread);
@@ -285,16 +285,16 @@ int init_stop_performance_counters(int* cntrs, int num, int command) {
 
     // print output
     if (command == 1) {
-        printf("\nEnabled %i counters in each of %i CPU cores", NumCounters, countthreads);
-        printf("\n\nPMC number:   Counter name:");
-        for (i = 0; i < NumCounters; i++) {                
-            printf("\n0x%08X    %-10s ", Counters[i], MSRCounters.CounterNames[i]);
-        }
+        //printf("\nEnabled %i counters in each of %i CPU cores", NumCounters, countthreads);
+        //printf("\n\nPMC number:   Counter name:");
+        //for (i = 0; i < NumCounters; i++) {                
+        //    printf("\n0x%08X    %-10s ", Counters[i], MSRCounters.CounterNames[i]);
+        //}
     }
     else {
-        printf("\nDisabled %i counters in each of %i CPU cores", NumCounters, countthreads);
+        //printf("\nDisabled %i counters in each of %i CPU cores", NumCounters, countthreads);
     }
-    printf("\n");
+    //printf("\n");
 
     // Clean up driver
 	if(command != 1)
@@ -309,77 +309,18 @@ extern "C" {
 //       Initialize counters 
 //
 //////////////////////////////////////////////////////////////////////
-	int init_performance_counters(int* cntrs, int num) {
-		return init_stop_performance_counters(cntrs, num, 1);
+	int init_performance_counters() {
+		return init_stop_performance_counters(1);
 	}
 
-	int stop_performance_counters(int* cntrs, int num) {
-		return init_stop_performance_counters(cntrs, num, 2);
+	int stop_performance_counters() {
+		return init_stop_performance_counters(2);
 	}
 
-/*
-	int* read_performance_counters(int* cntrs, int num) {
-		int* cntr_vals;
-		cntr_vals = (int*) calloc(1,sizeof(int)*MAXCOUNTERS*NumThreads);
+	void read_performance_counters(uint64_t* cntrs) {
 		for (int i=0; i<MAXCOUNTERS; i++) {
-			for (int t=0; t<NumThreads; t++){
-				MSRCounters.Put1(NumThreads, MSR_READ, CounterTypesDesired[i], t);
-			}
+			cntrs[i] = Readpmc(Counters[i]);
 		}
-		for (int i=0; i<MAXCOUNTERS; i++) {
-			for (int t=0; t<NumThreads; t++){
-				cntr_vals[t*num + i] = MSRCounters.read1(CounterTypesDesired[i],t);
-				printf("t%d Counter %d - %d\n", t, CounterTypesDesired[i],cntr_vals[t*num+i]);
-			}
-		}
-		return cntr_vals;
-	}
-*/
-/*
-	int* read_performance_counters(int* cntrs, int num) {
-		int* cntr_vals = (int*) calloc(1,sizeof(int)*MAXCOUNTERS*NumThreads);
-		for (int i = 0; i < MAXCOUNTERS; i++) {
-			int cntr_val = MSRCounters.msr.MSRRead(CounterTypesDesired[i]);
-			printf("counter #%d - %d\n", CounterTypesDesired[i], cntr_val);
-		}
-		free(cntr_vals);
-		return 0;
-	}
-*/
-/*
-	int* read_performance_counters(int* cntrs, int num) {
-		int* cntr_vals;
-		cntr_vals = (int*) calloc(1,sizeof(int)*MAXCOUNTERS*NumThreads);
-		for (int i=0; i<MAXCOUNTERS; i++) {
-			for (int t=0; t<NumThreads; t++){
-				//MSRCounters.Put1(NumThreads, MSR_READ, CounterTypesDesired[i], t);
-			}
-		}
-		for (int i=0; i<MAXCOUNTERS; i++) {
-			for (int t=0; t<NumThreads; t++){
-				cntr_vals[t*num + i] = MSRCounters.read1(CounterTypesDesired[i],t) - MSRCounters.read1(CounterTypesDesired[i],t);
-				printf("t%d Counter %d - %d\n", t, CounterTypesDesired[i],cntr_vals[t*num+i]);
-			}
-		}
-		return cntr_vals;
-	}
-	*/
-
-	int* read_performance_counters(int* cntrs, int num) {
-		printf("\n\n");
-		for (int i = 0; i < MAXCOUNTERS; i++) {
-			printf("Counters[i]: %s = %x\n",MSRCounters.CounterNames[i],Counters[i]);
-		}
-		printf("\n\n");
-		for ( int i = 0; i < MAXCOUNTERS; i++) {
-			//ThreadData[thread].CountTemp[i+1] = (int)Readpmc(Counters[i]);
-			if(MSRCounters.CounterNames[i]) {
-				printf("Counters[%d]: %s", i, MSRCounters.CounterNames[i]);
-				printf(" = 0x%llx\n",Readpmc(Counters[i]));
-			}
-		}
-
-	return NULL;
 	}
 
 
@@ -480,27 +421,6 @@ int setcounters(int argc, char* argv[]) {
     return 0;
 }
 
-void CCounters::print_queue1(int ThreadNum) {
-	int thread = ThreadNum;
-	printf("thread %d:\n",thread);
-	for(int i=0; i < queue1[thread].GetSize(); i++) {
-		printf("action: %d, register number: %d, val_lo: %d, val_hi: %d\n", queue1[thread].queue[i].msr_command, queue1[thread].queue[i].register_number, queue1[thread].queue[i].val[0], queue1[thread].queue[i].val[1]);
-	}
-	printf("\n\n");
-
-}
-
-
-void CCounters::print_queue2(int ThreadNum) {
-	int thread = ThreadNum;
-	printf("thread %d:\n",thread);
-	for(int i=0; i < queue2[thread].GetSize(); i++) {
-		printf("action: %d, register number: %d, val_lo: %d, val_hi: %d\n", queue2[thread].queue[i].msr_command, queue2[thread].queue[i].register_number, queue2[thread].queue[i].val[0], queue2[thread].queue[i].val[1]);
-	}
-	printf("\n\n");
-
-}
-
 //////////////////////////////////////////////////////////////////////////////
 //
 //        CMSRInOutQue class member functions
@@ -547,6 +467,27 @@ CCounters::CCounters() {
     for (int i = 0; i < MAXCOUNTERS; i++) CounterNames[i] = 0;
 }
 
+void CCounters::print_queue1(int ThreadNum) {
+	int thread = ThreadNum;
+	printf("thread %d:\n",thread);
+	for(int i=0; i < queue1[thread].GetSize(); i++) {
+		printf("action: %d, register number: %d, val_lo: %d, val_hi: %d\n", queue1[thread].queue[i].msr_command, queue1[thread].queue[i].register_number, queue1[thread].queue[i].val[0], queue1[thread].queue[i].val[1]);
+	}
+	printf("\n\n");
+
+}
+
+
+void CCounters::print_queue2(int ThreadNum) {
+	int thread = ThreadNum;
+	printf("thread %d:\n",thread);
+	for(int i=0; i < queue2[thread].GetSize(); i++) {
+		printf("action: %d, register number: %d, val_lo: %d, val_hi: %d\n", queue2[thread].queue[i].msr_command, queue2[thread].queue[i].register_number, queue2[thread].queue[i].val[0], queue2[thread].queue[i].val[1]);
+	}
+	printf("\n\n");
+
+}
+
 void CCounters::QueueCounters() {
     // Put counter definitions in queue
     int n = 0, CounterType; 
@@ -558,7 +499,7 @@ void CCounters::QueueCounters() {
     GetProcessorVendor();               // get microprocessor vendor
     GetProcessorFamily();               // get microprocessor family
     GetPMCScheme();                     // get PMC scheme
-	printf("MFamily = %d, MScheme = %d\n",MFamily,MScheme);
+	//printf("MFamily = %d, MScheme = %d\n",MFamily,MScheme);
 
     if (UsePMC) {   
         // Get all counter requests
@@ -614,7 +555,7 @@ void CCounters::QueueCounters() {
     
 		
 	}
-	printf("Queued counters\n");
+	//printf("Queued counters\n");
 }
 
 void CCounters::LockProcessor() {
@@ -936,7 +877,10 @@ const char * CCounters::DefineCounter(SCounterDefinition & CDef) {
     if ( !(CDef.ProcessorFamily & MFamily)) {
         return "Counter not defined for present microprocessor family";
     }
-    if (NumCounters >= MaxNumCounters) return "Too many counters";
+    if (NumCounters >= MaxNumCounters) {
+		//printf("NumCounters=%d MaxNumCounters=%d",NumCounters,MaxNumCounters);
+		return "Too many counters";
+	}
 
     if (CDef.CounterFirst & 0x40000000) { 
         // Fixed function counter
@@ -1099,7 +1043,9 @@ const char * CCounters::DefineCounter(SCounterDefinition & CDef) {
     }
 
     // Save counter register number in Counters list
+	//printf("NumCounters=%d, counternr=%d\n",NumCounters,counternr);
     Counters[NumCounters++] = counternr;
+	//printf("NumCounters=%d, counternr=%d\n",NumCounters,counternr);
 
     return NULL; // NULL = success
 }
