@@ -770,6 +770,7 @@ void CCounters::GetProcessorFamily() {
         // VIA processor
         if (Family == 6 && Model >= 0x0F) MFamily = VIA_NANO; // VIA Nano
     }
+	//diagnostics = 1;
     if (diagnostics) {
         printf(" Family %X, Model %X, MFamily %X", Family, Model, MFamily);
     }
@@ -1377,6 +1378,7 @@ SCounterDefinition CounterDefinitions[] = {
     {310, S_ID5,  INTEL_ICE, 0,  7,     0,   0x80,     0x04, "CodeMiss"   }, // code cache misses
     {311, S_ID5,  INTEL_ICE, 0,  7,     0,   0x24,     0xe1, "L1D Miss"   }, // level 1 data cache miss
     {320, S_ID5,  INTEL_ICE, 0,  7,     0,   0x24,     0x21, "L2 Miss"    }, // level 2 cache misses
+    {333, S_ID5,  INTEL_ICE, 0,  7,     0,   0x79,     0x20, "MS Uops"    }, // level 2 cache misses
 
     // Alder Lake and Golden Cove
     // The first three counters are fixed-function counters having their own register,
